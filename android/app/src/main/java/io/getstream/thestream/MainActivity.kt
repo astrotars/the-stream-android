@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                 FeedService.init(user, feedCredentials)
 
                 launch(Dispatchers.Main) {
-                    val intent = AuthedMainActivity.newIntent(applicationContext, user)
+                    val intent = AuthedMainActivity.newIntent(applicationContext)
                     startActivity(intent)
                 }
             }
