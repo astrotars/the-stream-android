@@ -1,6 +1,8 @@
 package io.getstream.thestream.services
 
 import io.getstream.cloud.CloudClient
+import io.getstream.core.models.Activity
+import io.getstream.core.options.Limit
 
 object FeedService {
     private lateinit var client: CloudClient
@@ -17,6 +19,13 @@ object FeedService {
         client
             .flatFeed("timeline")
             .follow(client.flatFeed("user", otherUser))
+            .join()
+    }
+
+    fun timeline(): MutableList<Activity> {
+        return client
+            .flatFeed("timeline")
+            .getActivities(Limit(25))
             .join()
     }
 }

@@ -31,7 +31,7 @@ class PeopleFragment : Fragment(), CoroutineScope by MainScope() {
             inflater, container, false
         )
 
-        val list: ListView = binding.listview
+        val list: ListView = binding.listPeople
 
         val adapter = ArrayAdapter(
             binding.root.context,
