@@ -7,9 +7,16 @@ object FeedService {
     private lateinit var user: String
 
     fun init(user: String, feedCredentials: BackendService.FeedCredentials) {
-        FeedService.user = user;
+        this.user = user
         client = CloudClient
             .builder(feedCredentials.apiKey, feedCredentials.token, user)
             .build()
+    }
+
+    fun follow(otherUser: String) {
+        client
+            .flatFeed("timeline")
+            .follow(client.flatFeed("user", otherUser))
+            .join()
     }
 }
