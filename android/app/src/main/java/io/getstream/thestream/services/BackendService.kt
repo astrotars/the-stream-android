@@ -5,15 +5,15 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import org.json.JSONArray
 import org.json.JSONObject
 
 object BackendService {
     private val http = OkHttpClient()
     private val JSON: MediaType = "application/json; charset=utf-8".toMediaType()
-    private const val apiRoot = "https://63119ec9.ngrok.io" // or use ngrok
+    private const val apiRoot = "http://10.0.2.2:8080"
 
     private lateinit var authToken: String
+    private lateinit var user: String
 
     fun signIn(user: String) {
         authToken = post(
@@ -21,6 +21,7 @@ object BackendService {
             mapOf("user" to user)
         )
             .getString("authToken")
+        this.user = user
     }
 
     data class FeedCredentials(val token: String, val apiKey: String)
@@ -44,9 +45,12 @@ object BackendService {
             .addHeader("Authorization", "Bearer $authToken")
             .get()
 
-        http.newCall(request.build()).execute().use {
-            val jsonArray = JSONArray(it.body!!.string())
-            return List(jsonArray.length()) { i -> jsonArray.get(i).toString() }
+        http.newCall(request.build()).execute().use { response ->
+            val jsonArray = JSONObject(response.body!!.string()).getJSONArray("users")
+
+            return List(jsonArray.length()) { i ->
+                jsonArray.get(i).toString()
+            }.filterNot { it == user }
         }
     }
 
