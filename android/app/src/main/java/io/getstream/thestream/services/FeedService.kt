@@ -3,6 +3,7 @@ package io.getstream.thestream.services
 import io.getstream.cloud.CloudClient
 import io.getstream.core.models.Activity
 import io.getstream.core.options.Limit
+import java.util.*
 
 object FeedService {
     private lateinit var client: CloudClient
@@ -34,5 +35,18 @@ object FeedService {
             .flatFeed("user")
             .getActivities(Limit(25))
             .join()
+    }
+
+    fun post(message: String) {
+        val feed = client.flatFeed("user")
+        feed.addActivity(
+            Activity
+                .builder()
+                .actor("SU:${user}")
+                .verb("post")
+                .`object`(UUID.randomUUID().toString())
+                .extraField("message", message)
+                .build()
+        ).join()
     }
 }

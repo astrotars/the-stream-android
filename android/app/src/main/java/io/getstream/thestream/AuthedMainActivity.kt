@@ -47,11 +47,4 @@ class AuthedMainActivity : AppCompatActivity() {
         }
         false
     }
-
-
-    companion object {
-        fun newIntent(context: Context): Intent {
-            return Intent(context, AuthedMainActivity::class.java)
-        }
-    }
 }

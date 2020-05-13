@@ -10,7 +10,6 @@ import android.widget.ListView
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
-import io.getstream.thestream.databinding.FragmentPeopleBinding
 import io.getstream.thestream.services.BackendService
 import io.getstream.thestream.services.FeedService
 import kotlinx.coroutines.CoroutineScope
@@ -27,21 +26,19 @@ class PeopleFragment : Fragment(), CoroutineScope by MainScope() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val binding: FragmentPeopleBinding = FragmentPeopleBinding.inflate(
-            inflater, container, false
-        )
+        val rootView: View = inflater.inflate(R.layout.fragment_people, container, false)
 
-        val list: ListView = binding.listPeople
+        val list: ListView = rootView.findViewById(R.id.list_people)
 
         val adapter = ArrayAdapter(
-            binding.root.context,
+            rootView.context,
             android.R.layout.simple_list_item_1,
             mutableListOf<String>()
         )
         list.adapter = adapter
 
-        list.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id ->
-            val alertDialogBuilder: AlertDialog.Builder = AlertDialog.Builder(context!!)
+        list.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
+            val alertDialogBuilder: AlertDialog.Builder = AlertDialog.Builder(rootView.context)
 
             alertDialogBuilder.setTitle("Pick an action")
             alertDialogBuilder.setPositiveButton("Follow") { dialog, _ ->
@@ -66,9 +63,10 @@ class PeopleFragment : Fragment(), CoroutineScope by MainScope() {
         launch(Dispatchers.IO) {
             val users = BackendService.getUsers()
             this@PeopleFragment.users = users
+
             launch(Dispatchers.Main) { adapter.addAll(users) }
         }
 
-        return binding.root
+        return rootView
     }
 }
