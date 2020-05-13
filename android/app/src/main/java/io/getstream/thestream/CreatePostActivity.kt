@@ -10,8 +10,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 
+const val POST_SUCCESS = 99
 
 class CreatePostActivity : AppCompatActivity(), CoroutineScope by MainScope() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_post)
@@ -26,6 +28,7 @@ class CreatePostActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                 FeedService.post(text)
 
                 launch(Dispatchers.Main) {
+                    setResult(POST_SUCCESS)
                     finish()
                 }
             }

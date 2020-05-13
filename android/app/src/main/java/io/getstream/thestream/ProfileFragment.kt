@@ -14,31 +14,48 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 
 class ProfileFragment : Fragment(), CoroutineScope by MainScope() {
+    private lateinit var adapter: FeedAdapter
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val rootView: View = inflater.inflate(R.layout.fragment_profile, container, false)
-        val listView: ListView = rootView.findViewById(R.id.list_profile)
-        val adapter = FeedAdapter(rootView.context, mutableListOf())
+        val listView: ListView = rootView.findViewById(R.id.list_profile_feed)
+        adapter = FeedAdapter(rootView.context, mutableListOf())
 
         listView.adapter = adapter
 
-        launch(Dispatchers.IO) {
-            val profileFeed = FeedService.profileFeed()
-
-            launch(Dispatchers.Main) { adapter.addAll(profileFeed) }
-        }
+        loadProfileFeed()
 
         val newPost: View = rootView.findViewById(R.id.new_post)
         newPost.setOnClickListener { view ->
-            startActivity(
-                Intent(rootView.context, CreatePostActivity::class.java)
+            startActivityForResult(
+                Intent(rootView.context, CreatePostActivity::class.java),
+                POST_SUCCESS
             )
         }
 
-
         return rootView
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (resultCode == POST_SUCCESS) {
+            loadProfileFeed()
+        }
+    }
+
+    private fun loadProfileFeed() {
+        launch(Dispatchers.IO) {
+            val profileFeed = FeedService.profileFeed()
+
+            launch(Dispatchers.Main) {
+                adapter.clear()
+                adapter.addAll(profileFeed)
+            }
+        }
     }
 }
