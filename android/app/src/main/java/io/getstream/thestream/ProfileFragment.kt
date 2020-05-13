@@ -1,16 +1,33 @@
 package io.getstream.thestream
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ListView
+import androidx.fragment.app.Fragment
+import io.getstream.thestream.services.FeedService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 
-class ProfileFragment : Fragment() {
+class ProfileFragment : Fragment(), CoroutineScope by MainScope() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_profile, container, false)
+        val rootView: View = inflater.inflate(R.layout.fragment_timeline, container, false)
+        val listView: ListView = rootView.findViewById<View>(R.id.list_timeline) as ListView
+        val adapter = FeedAdapter(context!!, mutableListOf())
+
+        listView.adapter = adapter
+
+        launch(Dispatchers.IO) {
+            val profileFeed = FeedService.profileFeed()
+            launch(Dispatchers.Main) { adapter.addAll(profileFeed) }
+        }
+
+        return rootView
     }
 }

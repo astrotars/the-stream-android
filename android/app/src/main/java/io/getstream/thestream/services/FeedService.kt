@@ -22,9 +22,16 @@ object FeedService {
             .join()
     }
 
-    fun timeline(): MutableList<Activity> {
+    fun timelineFeed(): MutableList<Activity> {
         return client
             .flatFeed("timeline")
+            .getActivities(Limit(25))
+            .join()
+    }
+
+    fun profileFeed(): MutableList<Activity> {
+        return client
+            .flatFeed("user")
             .getActivities(Limit(25))
             .join()
     }
