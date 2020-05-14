@@ -9,10 +9,10 @@ object FeedService {
     private lateinit var client: CloudClient
     private lateinit var user: String
 
-    fun init(user: String, feedCredentials: BackendService.FeedCredentials) {
+    fun init(user: String, credentials: BackendService.StreamCredentials) {
         this.user = user
         client = CloudClient
-            .builder(feedCredentials.apiKey, feedCredentials.token, user)
+            .builder(credentials.apiKey, credentials.token, user)
             .build()
     }
 

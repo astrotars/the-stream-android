@@ -6,6 +6,7 @@ import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import io.getstream.thestream.services.BackendService
+import io.getstream.thestream.services.ChatService
 import io.getstream.thestream.services.FeedService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,10 +27,14 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
             launch(Dispatchers.IO) {
                 BackendService.signIn(user)
+
                 val feedCredentials = BackendService.getFeedCredentials()
-                FeedService.init(user, feedCredentials)
+                val chatCredentials = BackendService.getChatCredentials()
 
                 launch(Dispatchers.Main) {
+                    FeedService.init(user, feedCredentials)
+                    ChatService.init(applicationContext, user, chatCredentials)
+
                     startActivity(
                         Intent(applicationContext, AuthedMainActivity::class.java)
                     )

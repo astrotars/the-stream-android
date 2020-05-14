@@ -11,6 +11,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
 import io.getstream.thestream.services.BackendService
+import io.getstream.thestream.services.ChatService
 import io.getstream.thestream.services.FeedService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -19,7 +20,6 @@ import kotlinx.coroutines.launch
 
 
 class PeopleFragment : Fragment(), CoroutineScope by MainScope() {
-    private var users: List<String> = emptyList()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -27,7 +27,6 @@ class PeopleFragment : Fragment(), CoroutineScope by MainScope() {
         savedInstanceState: Bundle?
     ): View? {
         val rootView: View = inflater.inflate(R.layout.fragment_people, container, false)
-
         val list: ListView = rootView.findViewById(R.id.list_people)
 
         val adapter = ArrayAdapter(
@@ -42,19 +41,29 @@ class PeopleFragment : Fragment(), CoroutineScope by MainScope() {
 
             alertDialogBuilder.setTitle("Pick an action")
             alertDialogBuilder.setPositiveButton("Follow") { dialog, _ ->
-                FeedService.follow(users[position])
+                val otherUser = adapter.getItem(position).toString()
+                FeedService.follow(otherUser)
                 dialog.dismiss()
                 Snackbar
                     .make(
                         activity!!.findViewById(android.R.id.content),
-                        "Successfully followed ${users[position]}",
+                        "Successfully followed $otherUser",
                         Snackbar.LENGTH_LONG
                     )
                     .show()
             }
 
-            alertDialogBuilder.setNegativeButton("Cancel") { dialog, _ ->
-                dialog.dismiss()
+            alertDialogBuilder.setNegativeButton("Chat") { dialog, _ ->
+                val otherUser = adapter.getItem(position).toString()
+                launch(Dispatchers.IO) {
+                    val channel = ChatService.createPrivateChannel(otherUser)
+
+                    launch(Dispatchers.Main) {
+                        dialog.dismiss()
+                        val intent = ChannelActivity.newIntent(rootView.context, channel)
+                        startActivity(intent)
+                    }
+                }
             }
 
             alertDialogBuilder.show()
@@ -62,11 +71,11 @@ class PeopleFragment : Fragment(), CoroutineScope by MainScope() {
 
         launch(Dispatchers.IO) {
             val users = BackendService.getUsers()
-            this@PeopleFragment.users = users
 
             launch(Dispatchers.Main) { adapter.addAll(users) }
         }
 
         return rootView
     }
+
 }
