@@ -58,7 +58,7 @@ class ChannelActivity : AppCompatActivity(), MessageInputView.PermissionRequestL
         val viewModelFactory = ChannelViewModelFactory(application, channelType, channelId)
         val viewModel = ViewModelProvider(this, viewModelFactory).get(ChannelViewModel::class.java)
 
-        viewModel.initialized.observe(this, Observer<Channel> { channel ->
+        viewModel.initialized.observe(this, Observer {
             // connect the view model
             binding.viewModel = viewModel
             binding.messageList.setViewModel(viewModel, this)

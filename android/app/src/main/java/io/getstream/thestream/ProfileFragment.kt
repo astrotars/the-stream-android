@@ -30,7 +30,7 @@ class ProfileFragment : Fragment(), CoroutineScope by MainScope() {
         loadProfileFeed()
 
         val newPost: View = rootView.findViewById(R.id.new_post)
-        newPost.setOnClickListener { view ->
+        newPost.setOnClickListener {
             startActivityForResult(
                 Intent(rootView.context, CreatePostActivity::class.java),
                 POST_SUCCESS

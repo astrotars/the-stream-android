@@ -27,6 +27,10 @@ android {
         enabled = true
     }
 
+    packagingOptions {
+        pickFirst 'META-INF/library_release.kotlin_module'
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -47,12 +51,13 @@ dependencies {
     implementation "io.getstream.client:stream-java:3.2.3"
     implementation 'com.github.GetStream:stream-chat-android:4.0.13'
     implementation 'com.github.bumptech.glide:glide:4.9.0'
+
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
-
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.annotation:annotation:1.1.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
