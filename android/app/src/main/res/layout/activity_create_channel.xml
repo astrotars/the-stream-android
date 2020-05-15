@@ -8,14 +8,14 @@
     tools:context="io.getstream.thestream.MainActivity">
 
     <EditText
-        android:id="@+id/post_text"
+        android:id="@+id/channel_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:autofillHints="Enter Post..."
+        android:autofillHints="Enter Channel Name..."
         android:ems="10"
-        android:hint="Post Text"
+        android:hint="Channel Name"
         android:inputType="text"
         app:layout_constraintEnd_toStartOf="@+id/submit"
         app:layout_constraintHorizontal_bias="0.5"
@@ -28,10 +28,10 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:text="Post"
-        app:layout_constraintBaseline_toBaselineOf="@+id/post_text"
+        android:text="Create"
+        app:layout_constraintBaseline_toBaselineOf="@+id/channel_name"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/post_text" />
+        app:layout_constraintStart_toEndOf="@+id/channel_name" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

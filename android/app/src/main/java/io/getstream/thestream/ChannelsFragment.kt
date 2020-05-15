@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.getstream.sdk.chat.viewmodel.ChannelListViewModel
@@ -15,6 +16,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 
 class ChannelsFragment : Fragment(), CoroutineScope by MainScope() {
+    private lateinit var viewModel: ChannelListViewModel
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -22,7 +25,7 @@ class ChannelsFragment : Fragment(), CoroutineScope by MainScope() {
     ): View? {
         val binding = FragmentChannelsBinding.inflate(layoutInflater)
         binding.lifecycleOwner = this
-        val viewModel = ViewModelProvider(this).get(ChannelListViewModel::class.java)
+        viewModel = ViewModelProvider(this).get(ChannelListViewModel::class.java)
 
         binding.viewModel = viewModel
         binding.channelList.setViewModel(viewModel, this)
@@ -32,16 +35,26 @@ class ChannelsFragment : Fragment(), CoroutineScope by MainScope() {
 
         binding.newChannel.setOnClickListener {
             startActivityForResult(
-                Intent(context, CreatePostActivity::class.java),
-                POST_SUCCESS
+                Intent(context, CreateChannelActivity::class.java),
+                CHANNEL_CREATE_SUCCESS
             )
         }
 
         binding.channelList.setOnChannelClickListener { channel ->
-            val intent = ChannelActivity.newIntent(context!!, channel)
-            startActivity(intent)
+            startActivity(
+                ChannelActivity.newIntent(context!!, channel)
+            )
         }
 
         return binding.root
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (resultCode == CHANNEL_CREATE_SUCCESS) {
+            Toast.makeText(context, "Created Channel!", Toast.LENGTH_LONG).show()
+        }
+    }
+
 }

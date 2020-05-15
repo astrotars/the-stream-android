@@ -7,9 +7,9 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ListView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import com.google.android.material.snackbar.Snackbar
 import io.getstream.thestream.services.BackendService
 import io.getstream.thestream.services.ChatService
 import io.getstream.thestream.services.FeedService
@@ -43,18 +43,17 @@ class PeopleFragment : Fragment(), CoroutineScope by MainScope() {
             alertDialogBuilder.setPositiveButton("Follow") { dialog, _ ->
                 val otherUser = adapter.getItem(position).toString()
                 FeedService.follow(otherUser)
+
                 dialog.dismiss()
-                Snackbar
-                    .make(
-                        activity!!.findViewById(android.R.id.content),
-                        "Successfully followed $otherUser",
-                        Snackbar.LENGTH_LONG
-                    )
+
+                Toast
+                    .makeText(context, "Successfully followed $otherUser", Toast.LENGTH_LONG)
                     .show()
             }
 
             alertDialogBuilder.setNegativeButton("Chat") { dialog, _ ->
                 val otherUser = adapter.getItem(position).toString()
+
                 launch(Dispatchers.IO) {
                     val channel = ChatService.createPrivateChannel(otherUser)
 

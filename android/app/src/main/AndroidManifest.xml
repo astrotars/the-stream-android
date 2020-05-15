@@ -16,6 +16,7 @@
 
         <activity android:name=".ChannelActivity" />
         <activity android:name=".CreatePostActivity" />
+        <activity android:name=".CreateChannelActivity" />
         <activity android:name=".AuthedMainActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
