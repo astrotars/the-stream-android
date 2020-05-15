@@ -5,6 +5,7 @@
 
 
     <data>
+
         <variable
             name="viewModel"
             type="com.getstream.sdk.chat.viewmodel.ChannelListViewModel" />
