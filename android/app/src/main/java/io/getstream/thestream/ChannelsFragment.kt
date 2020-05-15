@@ -8,9 +8,10 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.getstream.sdk.chat.model.ModelType
 import com.getstream.sdk.chat.viewmodel.ChannelListViewModel
+import io.getstream.chat.android.client.api.models.QuerySort
 import io.getstream.chat.android.client.models.Filters.eq
-import io.getstream.chat.android.client.models.ModelType
 import io.getstream.thestream.databinding.FragmentChannelsBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
@@ -26,12 +27,13 @@ class ChannelsFragment : Fragment(), CoroutineScope by MainScope() {
         val binding = FragmentChannelsBinding.inflate(layoutInflater)
         binding.lifecycleOwner = this
         viewModel = ViewModelProvider(this).get(ChannelListViewModel::class.java)
+        viewModel.setQuery(
+            eq("type", ModelType.channel_livestream),
+            QuerySort()
+        )
 
         binding.viewModel = viewModel
         binding.channelList.setViewModel(viewModel, this)
-
-        val filter = eq("type", ModelType.channel_livestream)
-        viewModel.setChannelFilter(filter)
 
         binding.newChannel.setOnClickListener {
             startActivityForResult(

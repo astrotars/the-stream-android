@@ -57,12 +57,10 @@ class ChannelActivity : AppCompatActivity(), MessageInputView.PermissionRequestL
         val viewModel = ViewModelProvider(this, viewModelFactory).get(ChannelViewModel::class.java)
 
         viewModel.initialized.observe(this, Observer {
-            // connect the view model
             binding.viewModel = viewModel
             binding.messageList.setViewModel(viewModel, this)
             binding.messageInput.setViewModel(viewModel, this)
             binding.channelHeader.setViewModel(viewModel, this)
-            // If you are using own MessageInputView please comment this line.
             binding.messageInput.setPermissionRequestListener(this)
         })
     }

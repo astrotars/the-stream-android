@@ -7,7 +7,9 @@ import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.client.logger.ChatLogLevel
 import io.getstream.chat.android.client.models.Channel
 import io.getstream.chat.android.client.models.User
+import io.getstream.chat.android.livedata.ChatDomain
 import java.util.*
+
 
 object ChatService {
     private lateinit var client: ChatClient
@@ -17,9 +19,17 @@ object ChatService {
         val chat = Chat.Builder(credentials.apiKey, context)
             .logLevel(ChatLogLevel.ALL)
             .build()
-
         this.user = User(user)
         this.user.extraData["name"] = user
+        ChatDomain.Builder(
+            context.applicationContext,
+            chat.client,
+            this.user
+        )
+            .offlineEnabled()
+            .userPresenceEnabled()
+            .build()
+
         this.client = chat.client
         this.client.setUser(this.user, credentials.token)
     }
@@ -27,10 +37,11 @@ object ChatService {
     fun createPrivateChannel(otherUser: String): Channel {
         val users = listOf(user.id, otherUser)
 
-        return client
+        val result = client
             .createChannel(ModelType.channel_messaging, users)
             .execute()
             .data()
+        return result
     }
 
     fun createGroupChannel(channelName: String) {
