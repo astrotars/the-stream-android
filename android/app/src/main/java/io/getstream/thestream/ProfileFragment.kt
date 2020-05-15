@@ -23,11 +23,9 @@ class ProfileFragment : Fragment(), CoroutineScope by MainScope() {
     ): View? {
         val rootView: View = inflater.inflate(R.layout.fragment_profile, container, false)
         val listView: ListView = rootView.findViewById(R.id.list_profile_feed)
+
         adapter = FeedAdapter(rootView.context, mutableListOf())
-
         listView.adapter = adapter
-
-        loadProfileFeed()
 
         val newPost: View = rootView.findViewById(R.id.new_post)
         newPost.setOnClickListener {
@@ -36,6 +34,8 @@ class ProfileFragment : Fragment(), CoroutineScope by MainScope() {
                 POST_SUCCESS
             )
         }
+
+        loadProfileFeed()
 
         return rootView
     }

@@ -14,4 +14,9 @@
         android:id="@+id/navigation_people"
         android:icon="@drawable/ic_people_black_24dp"
         android:title="People"/>
+
+    <item
+        android:id="@+id/navigation_channels"
+        android:icon="@drawable/ic_chat_black_24dp"
+        android:title="Channels"/>
 </menu>

@@ -15,9 +15,7 @@ import io.getstream.chat.android.client.models.Channel
 import io.getstream.thestream.databinding.ActivityChannelBinding
 
 class ChannelActivity : AppCompatActivity(), MessageInputView.PermissionRequestListener {
-
     private lateinit var binding: ActivityChannelBinding
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,8 +64,7 @@ class ChannelActivity : AppCompatActivity(), MessageInputView.PermissionRequestL
             binding.channelHeader.setViewModel(viewModel, this)
             // If you are using own MessageInputView please comment this line.
             binding.messageInput.setPermissionRequestListener(this)
-        }
-        )
+        })
     }
 
     companion object {

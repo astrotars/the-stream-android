@@ -6,11 +6,13 @@ import android.widget.Toast
 import com.getstream.sdk.chat.Chat
 import com.getstream.sdk.chat.model.ModelType
 import io.getstream.chat.android.client.ChatClient
+import io.getstream.chat.android.client.api.models.QueryChannelsRequest
 import io.getstream.chat.android.client.errors.ChatError
 import io.getstream.chat.android.client.logger.ChatLogLevel
 import io.getstream.chat.android.client.models.Channel
 import io.getstream.chat.android.client.models.User
 import io.getstream.chat.android.client.socket.InitConnectionListener
+import io.getstream.chat.android.client.utils.FilterObject
 
 object ChatService {
     private lateinit var client: ChatClient
