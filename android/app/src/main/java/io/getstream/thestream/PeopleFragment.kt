@@ -11,7 +11,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import io.getstream.thestream.services.BackendService
-import io.getstream.thestream.services.ChatService
 import io.getstream.thestream.services.FeedService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -49,20 +48,6 @@ class PeopleFragment : Fragment(), CoroutineScope by MainScope() {
                 Toast
                     .makeText(context, "Successfully followed $otherUser", Toast.LENGTH_LONG)
                     .show()
-            }
-
-            alertDialogBuilder.setNegativeButton("Chat") { dialog, _ ->
-                val otherUser = adapter.getItem(position).toString()
-
-                launch(Dispatchers.IO) {
-                    val channel = ChatService.createPrivateChannel(otherUser)
-
-                    launch(Dispatchers.Main) {
-                        dialog.dismiss()
-                        val intent = ChannelActivity.newIntent(rootView.context, channel)
-                        startActivity(intent)
-                    }
-                }
             }
 
             alertDialogBuilder.show()

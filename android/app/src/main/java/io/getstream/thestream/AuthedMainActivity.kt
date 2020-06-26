@@ -45,11 +45,6 @@ class AuthedMainActivity : AppCompatActivity() {
 
                 return@OnNavigationItemSelectedListener true
             }
-            R.id.navigation_channels -> {
-                addFragment(ChannelsFragment())
-
-                return@OnNavigationItemSelectedListener true
-            }
         }
         false
     }
