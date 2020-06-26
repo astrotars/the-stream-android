@@ -19,7 +19,9 @@ object ChatService {
         val chat = Chat.Builder(credentials.apiKey, context)
             .logLevel(ChatLogLevel.ALL)
             .build()
+
         this.user = User(user)
+
         this.user.extraData["name"] = user
         ChatDomain.Builder(
             context.applicationContext,
@@ -40,8 +42,11 @@ object ChatService {
         val result = client
             .createChannel(ModelType.channel_messaging, users)
             .execute()
-            .data()
-        return result
+        if (result.isSuccess) {
+            return result.data()
+        } else {
+            throw Exception("Failed to create channel with reason: ${result.error()}")
+        }
     }
 
     fun createGroupChannel(channelName: String) {
