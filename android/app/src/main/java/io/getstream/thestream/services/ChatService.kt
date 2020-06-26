@@ -45,7 +45,7 @@ object ChatService {
         if (result.isSuccess) {
             return result.data()
         } else {
-            throw Exception("Failed to create channel with reason: ${result.error()}")
+            throw result.error()
         }
     }
 
