@@ -16,20 +16,16 @@ object ChatService {
     private lateinit var user: User
 
     fun init(context: Context, user: String, credentials: BackendService.StreamCredentials) {
-        val chat = Chat.Builder(credentials.apiKey, context)
+        val chat = Chat
+            .Builder(credentials.apiKey, context)
             .logLevel(ChatLogLevel.ALL)
             .build()
 
         this.user = User(user)
 
         this.user.extraData["name"] = user
-        ChatDomain.Builder(
-            context.applicationContext,
-            chat.client,
-            this.user
-        )
-            .offlineEnabled()
-            .userPresenceEnabled()
+        ChatDomain
+            .Builder(context.applicationContext, chat.client, this.user)
             .build()
 
         this.client = chat.client
