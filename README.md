@@ -45,4 +45,5 @@ First, we'll be building the login screen which looks like this:
 
 To start, let's lay our form out in Android. In our activity_main.xml layout we have a simple ConstraintLayout with an EditText and Button:
 
-<script src="https://gist.github.com/psylinse/dfebb0a94aa30afc7d335251e3d88796.js"></script>
+{% gist dfebb0a94aa30afc7d335251e3d88796 %}
+
