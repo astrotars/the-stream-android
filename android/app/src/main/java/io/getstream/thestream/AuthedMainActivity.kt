@@ -14,7 +14,7 @@ class AuthedMainActivity : AppCompatActivity() {
         val navigation = findViewById<BottomNavigationView>(R.id.navigation)
         navigation.setOnNavigationItemSelectedListener(navListener)
 
-        addFragment(TimelineFragment())
+        addFragment(PeopleFragment())
     }
 
     private fun addFragment(fragment: Fragment) {
@@ -30,16 +30,6 @@ class AuthedMainActivity : AppCompatActivity() {
 
     private val navListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         when (item.itemId) {
-            R.id.navigation_timeline -> {
-                addFragment(TimelineFragment())
-
-                return@OnNavigationItemSelectedListener true
-            }
-            R.id.navigation_profile -> {
-                addFragment(ProfileFragment())
-
-                return@OnNavigationItemSelectedListener true
-            }
             R.id.navigation_people -> {
                 addFragment(PeopleFragment())
 

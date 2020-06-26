@@ -26,19 +26,6 @@ object BackendService {
 
     data class StreamCredentials(val token: String, val apiKey: String)
 
-    fun getFeedCredentials(): StreamCredentials {
-        val response = post(
-            "/v1/stream-feed-credentials",
-            mapOf(),
-            authToken
-        )
-
-        return StreamCredentials(
-            response.getString("token"),
-            response.getString("apiKey")
-        )
-    }
-
     fun getChatCredentials(): StreamCredentials {
         val response = post(
             "/v1/stream-chat-credentials",

@@ -7,12 +7,10 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ListView
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import io.getstream.thestream.services.BackendService
 import io.getstream.thestream.services.ChatService
-import io.getstream.thestream.services.FeedService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -40,18 +38,9 @@ class PeopleFragment : Fragment(), CoroutineScope by MainScope() {
             val alertDialogBuilder: AlertDialog.Builder = AlertDialog.Builder(rootView.context)
 
             alertDialogBuilder.setTitle("Pick an action")
-            alertDialogBuilder.setPositiveButton("Follow") { dialog, _ ->
-                val otherUser = adapter.getItem(position).toString()
-                FeedService.follow(otherUser)
+            alertDialogBuilder.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
 
-                dialog.dismiss()
-
-                Toast
-                    .makeText(context, "Successfully followed $otherUser", Toast.LENGTH_LONG)
-                    .show()
-            }
-
-            alertDialogBuilder.setNegativeButton("Chat") { dialog, _ ->
+            alertDialogBuilder.setPositiveButton("Chat") { dialog, _ ->
                 val otherUser = adapter.getItem(position).toString()
 
                 launch(Dispatchers.IO) {
