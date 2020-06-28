@@ -2,7 +2,7 @@
 
 In this series, we'll create a simple Android application that allows a user to chat 1-on-1 and chat in groups. Stream's [Chat API](https://getstream.io/chat/), combined with Android, make it straightforward to build this sort of complex interaction. All source code for this application is available on [GitHub](https://github.com/psylinse/the-stream-android/). This application is fully functional on Android.
 
-To keep things focused, we'll be showing only the essential code. Often there is the context around those code snippets, which are necessary, such as layout or navigation. Please refer to the full source code if you're confused on how something works. Each snippet is accompanied by a comment explaining which files and lines it came from. Also, please refer to the `build.gradle` file to see what libraries we're using.
+To keep things focused, we'll be showing only the essential code. Often there is the context around those code snippets, which are necessary, such as layout or navigation. Please refer to the full source code if you're confused about how something works. Each snippet is accompanied by a comment explaining which files and lines it came from. Also, please refer to the `build.gradle` file to see what libraries we're using.
 
 To [build our social network](https://getstream.io/build/social-networks/), we'll need both a backend and a mobile application. Most of the work is done in the mobile app, but we need the backend to create frontend tokens for interacting with the Stream API securely.
 
@@ -233,13 +233,13 @@ object ChatService {
 }
 ```
 
-The `ChatService` is a singleton (by using Kotlin's [object](https://kotlinlang.org/docs/reference/object-declarations.html)) which stores a `ChatClient` instance. `ChatClient` is a class provided by Stream's library. This class is specifically used to provide the functionality to client applications via frontend tokens. After we initialize our chat instance, we configure our `ChatDomain` by setting the user that's autheneticated. We then set the user on the `ChatClient` and we're good to go.
+The `ChatService` is a singleton (by using Kotlin's [object](https://kotlinlang.org/docs/reference/object-declarations.html)) which stores a `ChatClient` instance. `ChatClient` is a class provided by Stream's library. This class is specifically used to provide the functionality to client applications via frontend tokens. After we initialize our chat instance, we configure our `ChatDomain` by setting the user that's authenticated. We then set the user on the `ChatClient` and we're good to go.
 
 Now that we're authenticated with Stream, we're ready to start our first chat!
 
 ## Creating a 1-on-1 Chat
 
-First we need to select a user to chat with. We'll build a simple list of users that with a prompt to start a chat. Our home screen will look like this:
+First, we need to select a user to chat with. We'll build a simple list of users with a prompt to start a chat. Our home screen will look like this:
 
 ![](images/home.png)
 
@@ -439,7 +439,7 @@ This calls to the Stream `client` to create a channel with the type `channel_mes
 
 ## Viewing A 1-on-1 Chat
 
-Next we'll create our chat view:
+Next, we'll create our chat view:
 
 ![](images/direct-chat.png)
 
@@ -582,13 +582,13 @@ class ChannelActivity : AppCompatActivity(), MessageInputView.PermissionRequestL
 }
 ```
 
-In our `initViewModel` method we use a few built in Stream classes. First, we create a `ChannelViewModelFactory` by passing in our channel type and `channelId`. We then use that factory by passing it into `ViewModelProvider` which will create an instance of the appropriate `ChannelViewModel`. Upon initializing, we bind this `viewModel` to our view and the necessary components. The rest of `ChannelActivity` is boilerplate that handles permissions and capturing images in the message input.
+In our `initViewModel` method we use a few built-in Stream classes. First, we create a `ChannelViewModelFactory` by passing in our channel type and `channelId`. We then use that factory by passing it into `ViewModelProvider` which will create an instance of the appropriate `ChannelViewModel`. Upon initializing, we bind this `viewModel` to our view and the necessary components. The rest of `ChannelActivity` is boilerplate that handles permissions and capturing images in the message input.
 
-We now have direct 1-on-1 chat. Next, let's see how to incorporate group chat.
+We now have 1-on-1 chat. Next, let's see how to incorporate group chat.
 
 ## Listing and Joining Group Chats
 
-Next we'll list our group chats. Here's what the screen will look like when a user clicks on "Channels" in the bottom navigation bar:
+Next, we'll list our group chats. Here's what the screen will look like when a user clicks on "Channels" in the bottom navigation bar:
 
 ![](images/channels.png)
 
@@ -714,7 +714,7 @@ class ChannelsFragment : Fragment(), CoroutineScope by MainScope() {
 }
 ```
 
-In `onCreateView` se use the Stream `ViewModelProvider` to give us an instance of `ChannelListViewModel`. We set the query of this to look for channels of the type `channel_livestream`. We then bind this `viewModel`. *Note: `channel_livestream` is a built in Stream channel type that's convinient for this tutorial. Please read up on [different channel types](https://getstream.io/chat/docs/channel_features/?language=js) to use one appropriate to your use case.* 
+In `onCreateView` uses the Stream `ViewModelProvider` to give us an instance of `ChannelListViewModel`. We set the query of this to look for channels of the type `channel_livestream`. We then bind this `viewModel`. *Note: `channel_livestream` is a built-in Stream channel type that's convenient for this tutorial. Please read up on [different channel types](https://getstream.io/chat/docs/channel_features/?language=js) to use one appropriate to your use case.* 
 
 When a user clicks on a channel, we start our `ChannelActivity`. Since that activity is generic, there's nothing more for us to do! A user will join the channel and be able to chat in the group.
 
@@ -820,6 +820,6 @@ fun createGroupChannel(channelName: String) {
 }
 ```
 
-This method sanitizes the incoming chat name, and creates it via the Stream `client`. We set the type of channel (`channel_livestream`), channel name and image.
+This method sanitizes the incoming chat name, and creates it via the Stream `client`. We set the type of channel (`channel_livestream`), channel name, and image.
 
 And that's it! We now have a fully functioning small social application that allows direct and group chat.
