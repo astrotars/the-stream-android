@@ -233,7 +233,7 @@ object ChatService {
 }
 ```
 
-The `ChatService` is a singleton (by using Kotlin's [object](https://kotlinlang.org/docs/reference/object-declarations.html)) which stores a `ChatClient` instance. `ChatClient` is a class provided by Stream's library. This class is specifically used to provide the functionality to client applications via frontend tokens. 
+The `ChatService` is a singleton (by using Kotlin's [object](https://kotlinlang.org/docs/reference/object-declarations.html)) which stores a `ChatClient` instance. `ChatClient` is a class provided by Stream's library. This class is specifically used to provide the functionality to client applications via frontend tokens. After we initialize our chat instance, we configure our `ChatDomain` by setting the user that's autheneticated. We then set the user on the `ChatClient` and we're good to go.
 
 Now that we're authenticated with Stream, we're ready to start our first chat!
 
@@ -420,5 +420,406 @@ This is a simple call to the `backend` to get our list of users. Since the backe
 Once this list is returned, we populate the `PeopleFragment`'s `ListView` with a simple `ArrayAdapter`. On each item, we bind via `onItemClickListener`. We pop up an alert and upon a user clicking `Chat` we create a chat room with `ChatService.createPrivateChannel`:
 
 ```kotlin
+// android/app/src/main/java/io/getstream/thestream/services/ChatService.kt:35
+fun createPrivateChannel(otherUser: String): Channel {
+    val users = listOf(user.id, otherUser)
 
+    val result = client
+        .createChannel(ModelType.channel_messaging, users)
+        .execute()
+    if (result.isSuccess) {
+        return result.data()
+    } else {
+        throw result.error()
+    }
+}
 ```
+
+This calls to the Stream `client` to create a channel with the type `channel_messaging`. Since this a private chat, we tell Stream to restrict the channel to those two users. 
+
+## Viewing A 1-on-1 Chat
+
+Next we'll create our chat view:
+
+![](images/direct-chat.png)
+
+Once the `createPrivateChannel` method returns, `PeopleFragment` launches `ChannelActivity` with the newly created `channel`. Since this activity wraps Stream's UI components, let's first see the layout definition:
+
+```xml
+<!-- android/app/src/main/res/layout/activity_channel.xml:1 -->
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="viewModel"
+            type="com.getstream.sdk.chat.viewmodel.ChannelViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context="com.example.chattutorial.ChannelActivity">
+
+        <com.getstream.sdk.chat.view.ChannelHeaderView
+            android:id="@+id/channelHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#FFF"
+            app:layout_constraintEnd_toStartOf="@+id/messageList"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:streamChannelHeaderBackButtonShow="true" />
+
+        <com.getstream.sdk.chat.view.MessageListView
+            android:id="@+id/messageList"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginBottom="10dp"
+            android:background="#FFF"
+            app:layout_constraintBottom_toTopOf="@+id/message_input"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/channelHeader" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:padding="6dp"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:isGone="@{!safeUnbox(viewModel.loading)}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ProgressBar
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            app:isGone="@{!safeUnbox(viewModel.loadingMore)}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="parent" />
+
+        <com.getstream.sdk.chat.view.MessageInputView
+            android:id="@+id/message_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/messageList" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
+```
+
+Here we use a few built in views, `ChannelHeaderView`, `MessageListView`, and `MessageInputView`. In order to use these built-in Stream Chat UI views, we need to back them with a `ChannelViewModel`. We build this in our `ChannelActivity`:
+
+```kotlin
+// android/app/src/main/java/io/getstream/thestream/ChannelActivity.kt:17
+class ChannelActivity : AppCompatActivity(), MessageInputView.PermissionRequestListener {
+    private lateinit var binding: ActivityChannelBinding
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val channelType = intent.getStringExtra(EXTRA_CHANNEL_TYPE)!!
+        val channelId = intent.getStringExtra(EXTRA_CHANNEL_ID)!!
+
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_channel)
+        binding.lifecycleOwner = this
+
+        initViewModel(channelType, channelId)
+    }
+
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
+        super.onActivityResult(requestCode, resultCode, data)
+        binding.messageInput.captureMedia(requestCode, resultCode, data)
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<String?>,
+        grantResults: IntArray
+    ) {
+        binding.messageInput.permissionResult(requestCode, permissions, grantResults)
+    }
+
+    override fun openPermissionRequest() {
+        PermissionChecker.permissionCheck(this, null)
+    }
+
+    private fun initViewModel(
+        channelType: String,
+        channelId: String
+    ) {
+        val viewModelFactory = ChannelViewModelFactory(application, channelType, channelId)
+        val viewModel = ViewModelProvider(this, viewModelFactory).get(ChannelViewModel::class.java)
+
+        viewModel.initialized.observe(this, Observer {
+            binding.viewModel = viewModel
+            binding.messageList.setViewModel(viewModel, this)
+            binding.messageInput.setViewModel(viewModel, this)
+            binding.channelHeader.setViewModel(viewModel, this)
+            binding.messageInput.setPermissionRequestListener(this)
+        })
+    }
+    // ...
+}
+```
+
+In our `initViewModel` method we use a few built in Stream classes. First, we create a `ChannelViewModelFactory` by passing in our channel type and `channelId`. We then use that factory by passing it into `ViewModelProvider` which will create an instance of the appropriate `ChannelViewModel`. Upon initializing, we bind this `viewModel` to our view and the necessary components. The rest of `ChannelActivity` is boilerplate that handles permissions and capturing images in the message input.
+
+We now have direct 1-on-1 chat. Next, let's see how to incorporate group chat.
+
+## Listing and Joining Group Chats
+
+Next we'll list our group chats. Here's what the screen will look like when a user clicks on "Channels" in the bottom navigation bar:
+
+![](images/channels.png)
+
+Recall from above we show a `ChannelsFragment` when the user clicks on the second tab in the navigation. This fragment is a view that shows a list of channels via Stream's `ChannelListView`. Here's the layout:
+
+```xml
+<!-- android/app/src/main/res/layout/fragment_channels.xml:1 -->
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.getstream.sdk.chat.viewmodel.ChannelListViewModel" />
+    </data>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ChannelsFragment">
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context="com.example.chattutorial.MainActivity">
+
+
+            <com.getstream.sdk.chat.view.ChannelListView
+                android:id="@+id/channelList"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginBottom="10dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:streamReadStateAvatarHeight="15dp"
+                app:streamReadStateAvatarWidth="15dp"
+                app:streamReadStateTextSize="9sp"
+                app:streamShowReadState="true" />
+
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:isGone="@{!safeUnbox(viewModel.loading)}"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ProgressBar
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginBottom="16dp"
+                app:isGone="@{!safeUnbox(viewModel.loadingMore)}"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/new_channel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|bottom"
+            android:layout_margin="16dp"
+            android:src="@drawable/ic_add_white_24dp" />
+    </FrameLayout>
+</layout>
+```
+
+This layout uses a `FrameLayout` to float a channel create button above the `ChannelListView`. Like before, we have another view model, `ChannelListViewModel`, that the stream channel list view component expects.  We initialize this in the `ChannelsFragment`:
+
+```kotlin
+// android/app/src/main/java/io/getstream/thestream/ChannelsFragment.kt:19
+class ChannelsFragment : Fragment(), CoroutineScope by MainScope() {
+    private lateinit var viewModel: ChannelListViewModel
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        val binding = FragmentChannelsBinding.inflate(layoutInflater)
+        binding.lifecycleOwner = this
+        viewModel = ViewModelProvider(this).get(ChannelListViewModel::class.java)
+        viewModel.setQuery(
+            eq("type", ModelType.channel_livestream),
+            QuerySort()
+        )
+
+        binding.viewModel = viewModel
+        binding.channelList.setViewModel(viewModel, this)
+
+        binding.newChannel.setOnClickListener {
+            startActivityForResult(
+                Intent(context, CreateChannelActivity::class.java),
+                CHANNEL_CREATE_SUCCESS
+            )
+        }
+
+        binding.channelList.setOnChannelClickListener { channel ->
+            startActivity(
+                ChannelActivity.newIntent(context!!, channel)
+            )
+        }
+
+        return binding.root
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (resultCode == CHANNEL_CREATE_SUCCESS) {
+            Toast.makeText(context, "Created Channel!", Toast.LENGTH_LONG).show()
+        }
+    }
+
+}
+```
+
+In `onCreateView` se use the Stream `ViewModelProvider` to give us an instance of `ChannelListViewModel`. We set the query of this to look for channels of the type `channel_livestream`. We then bind this `viewModel`. *Note: `channel_livestream` is a built in Stream channel type that's convinient for this tutorial. Please read up on [different channel types](https://getstream.io/chat/docs/channel_features/?language=js) to use one appropriate to your use case.* 
+
+When a user clicks on a channel, we start our `ChannelActivity`. Since that activity is generic, there's nothing more for us to do! A user will join the channel and be able to chat in the group.
+
+## Creating a New Group Chat
+
+To create a new channel, set a click listener, via `setOnClickListener`, on our floating action button and start the `CreateChannelActivity`. This activity is a simple form that takes a new channel name. Here's the layout:
+
+```xml
+<!-- android/app/src/main/res/layout/activity_create_channel.xml:1 -->
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="io.getstream.thestream.MainActivity">
+
+    <EditText
+        android:id="@+id/channel_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:autofillHints="Enter Channel Name..."
+        android:ems="10"
+        android:hint="Channel Name"
+        android:inputType="text"
+        app:layout_constraintEnd_toStartOf="@+id/submit"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/submit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:text="Create"
+        app:layout_constraintBaseline_toBaselineOf="@+id/channel_name"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/channel_name" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+```
+
+And our `CreateChannelActivity`:
+
+```kotlin
+// android/app/src/main/java/io/getstream/thestream/CreateChannelActivity.kt:13
+const val CHANNEL_CREATE_SUCCESS = 99
+
+class CreateChannelActivity : AppCompatActivity(), CoroutineScope by MainScope() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_create_channel)
+
+        val submit: Button = findViewById(R.id.submit)
+        val channelName: EditText = findViewById(R.id.channel_name)
+
+        submit.setOnClickListener {
+            launch(Dispatchers.IO) {
+                ChatService.createGroupChannel(
+                    channelName.text.toString()
+                )
+
+                launch(Dispatchers.Main) {
+                    setResult(CHANNEL_CREATE_SUCCESS)
+                    finish()
+                }
+            }
+        }
+    }
+}
+```
+
+This activity takes the name and passes it to `ChatService.createGroupChannel`, which in turn creates a new group channel in Stream:
+
+```kotlin
+// android/app/src/main/java/io/getstream/thestream/services/ChatService.kt:48
+fun createGroupChannel(channelName: String) {
+    val channelId = channelName
+        .toLowerCase(Locale.getDefault())
+        .replace("\\s".toRegex(), "-")
+
+    val result = client
+        .createChannel(
+            ModelType.channel_livestream,
+            channelId,
+            mapOf(
+                "name" to channelName,
+                "image" to "https://robohash.org/${channelId}.png"
+            )
+        )
+        .execute()
+
+    if (result.isError) {
+        throw result.error()
+    }
+}
+```
+
+This method sanitizes the incoming chat name, and creates it via the Stream `client`. We set the type of channel (`channel_livestream`), channel name and image.
+
+And that's it! We now have a fully functioning small social application that allows direct and group chat.
