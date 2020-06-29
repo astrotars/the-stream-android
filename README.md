@@ -48,6 +48,7 @@ First, we'll be building the login screen which looks like this:
 
 To start, let's lay our form out in Android. In our `activity_main.xml` layout we have a simple `ConstraintLayout` with an `EditText` and `Button`:
 
+<!-- https://gist.github.com/psylinse/dfebb0a94aa30afc7d335251e3d88796 -->
 ```xml
 <!-- android/app/src/main/res/layout/activity_main.xml:1 -->
 <?xml version="1.0" encoding="utf-8"?>
@@ -92,6 +93,8 @@ To start, let's lay our form out in Android. In our `activity_main.xml` layout w
 
 Let's bind to this layout and respond in `MainActivity`:
 
+
+<!-- https://gist.github.com/psylinse/02ff32b36e7c2ee63576c6c211e3c1fb -->
 ```kotlin
 // android/app/src/main/java/io/getstream/thestream/MainActivity.kt:16
 class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
@@ -130,6 +133,7 @@ Once we have our token, we initialize our `ChatService` so we can talk to Stream
 
 Before seeing how we start a chat, let's see how we auth and initialize Stream Chat. First we sign in to the backend via `BackendService.signIn`:
 
+<!-- https://gist.github.com/psylinse/d096a1d500fdf378549f9f7eaf756fb0 -->
 ```kotlin
 // android/app/src/main/java/io/getstream/thestream/services/BackendService.kt:18
 fun signIn(user: String) {
@@ -162,6 +166,7 @@ We do a simple `POST` http request to our backend endpoint `/v1/users`, which re
 
 Once the user is signed in with our `backend` we can get our chat credentials via `BackendService.getChatCredentials()`:
 
+<!-- https://gist.github.com/psylinse/8dfd9a57bb805747c20e7bf0b80087b9 -->
 ```kotlin
 // android/app/src/main/java/io/getstream/thestream/services/BackendService.kt:27
 data class StreamCredentials(val token: String, val apiKey: String)
@@ -182,6 +187,7 @@ fun getChatCredentials(): StreamCredentials {
 
 Similar to before, we `POST` to our backend to get our chat credentials. The one difference being we use our `authToken` to authenticate against our backend. Since this backend endpoint creates a Stream user for us, let's take a look:
 
+<!-- https://gist.github.com/psylinse/e3a6997bdab1d3afc4da222da3a9089d -->
 ```javascript
 // backend/src/controllers/v1/stream-feed-credentials/stream-feed-credentials.action.js:1
 import dotenv from 'dotenv';
@@ -212,6 +218,7 @@ We use the [Stream JavaScript library](https://github.com/GetStream/stream-js) t
 
 In the mobile app, we use the returned credentials to intialize our `ChatService` by calling `ChatService.init` in `MainActivity`. Here's the `init`:
 
+<!-- https://gist.github.com/psylinse/099549762b2bb7e02924bae6cfaa40e9 -->
 ```kotlin
 // android/app/src/main/java/io/getstream/thestream/services/ChatService.kt:14
 object ChatService {
@@ -250,6 +257,7 @@ First, we need to select a user to chat with. We'll build a simple list of users
 
 Let's lay out a simple navigation in `AuthedMainActivity` and show a list of people by default. First, our layout:
 
+<!-- https://gist.github.com/psylinse/eae87410486953ab4383f33bd9b3b7f7 -->
 ```xml
 <!-- android/app/src/main/res/layout/activity_authed_main.xml:1 -->
 <?xml version="1.0" encoding="utf-8"?>
@@ -281,6 +289,7 @@ Let's lay out a simple navigation in `AuthedMainActivity` and show a list of peo
 
 And here's our `AuthedMainActivity`:
 
+<!-- https://gist.github.com/psylinse/a89a34fea02aad37ccb47750ed449f27 -->
 ```kotlin
 // android/app/src/main/java/io/getstream/thestream/AuthedMainActivity.kt:8
 class AuthedMainActivity : AppCompatActivity() {
@@ -326,6 +335,7 @@ class AuthedMainActivity : AppCompatActivity() {
 
 This is a simple tabbed `BottomNavigationView`. We have two views, `People` and `Channels`. First let's dig into the `People` view which is backed by `PeopleFragment`. We also boot the `PeopleFragment` by default which contains our list of people:
 
+<!-- https://gist.github.com/psylinse/a0198fa357fd5add7e02d19becf836a1 -->
 ```kotlin
 // android/app/src/main/java/io/getstream/thestream/PeopleFragment.kt:20
 class PeopleFragment : Fragment(), CoroutineScope by MainScope() {
@@ -382,6 +392,7 @@ class PeopleFragment : Fragment(), CoroutineScope by MainScope() {
 
 which is backed by a simple list layout:
 
+<!-- https://gist.github.com/psylinse/d8af92043ecdda948cb982a1002ba157 -->
 ```xml
 <!-- android/app/src/main/res/layout/fragment_people.xml:1 -->
 <?xml version="1.0" encoding="utf-8"?>
@@ -402,6 +413,7 @@ which is backed by a simple list layout:
 
 With the layout and navigation out of the way, we can focus on starting our chat. The `PeopleFragment` populates the list of user's via a `BackendService.getUsers` call:
 
+<!-- https://gist.github.com/psylinse/bdc2384a8be80b26ef331677ffb85708 -->
 ```kotlin
 // android/app/src/main/java/io/getstream/thestream/services/BackendService.kt:42
 fun getUsers(): List<String> {
@@ -424,6 +436,7 @@ This is a simple call to the `backend` to get our list of users. Since the backe
 
 Once this list is returned, we populate the `PeopleFragment`'s `ListView` with a simple `ArrayAdapter`. On each item, we bind via `onItemClickListener`. We pop up an alert and upon a user clicking `Chat` we create a chat room with `ChatService.createPrivateChannel`:
 
+<!-- https://gist.github.com/psylinse/a47a61af6c63d1ee5bf1b34358853d20 -->
 ```kotlin
 // android/app/src/main/java/io/getstream/thestream/services/ChatService.kt:35
 fun createPrivateChannel(otherUser: String): Channel {
@@ -450,6 +463,7 @@ Next, we'll create our chat view:
 
 Once the `createPrivateChannel` method returns, `PeopleFragment` launches `ChannelActivity` with the newly created `channel`. Since this activity wraps Stream's UI components, let's first see the layout definition:
 
+<!-- https://gist.github.com/psylinse/4002a35d294c9e5fe404d99851e71c94 -->
 ```xml
 <!-- android/app/src/main/res/layout/activity_channel.xml:1 -->
 <?xml version="1.0" encoding="utf-8"?>
@@ -531,6 +545,7 @@ Once the `createPrivateChannel` method returns, `PeopleFragment` launches `Chann
 
 Here we use a few built in views, `ChannelHeaderView`, `MessageListView`, and `MessageInputView`. In order to use these built-in Stream Chat UI views, we need to back them with a `ChannelViewModel`. We build this in our `ChannelActivity`:
 
+<!-- https://gist.github.com/psylinse/ec1b900cf1bcf5c12bbdb32eef33ff69 -->
 ```kotlin
 // android/app/src/main/java/io/getstream/thestream/ChannelActivity.kt:17
 class ChannelActivity : AppCompatActivity(), MessageInputView.PermissionRequestListener {
@@ -599,6 +614,7 @@ Next, we'll list our group chats. Here's what the screen will look like when a u
 
 Recall from above we show a `ChannelsFragment` when the user clicks on the second tab in the navigation. This fragment is a view that shows a list of channels via Stream's `ChannelListView`. Here's the layout:
 
+<!-- https://gist.github.com/psylinse/6dae984780ac78cfbb784aedcd41c380 -->
 ```xml
 <!-- android/app/src/main/res/layout/fragment_channels.xml:1 -->
 <?xml version="1.0" encoding="utf-8"?>
@@ -671,6 +687,7 @@ Recall from above we show a `ChannelsFragment` when the user clicks on the secon
 
 This layout uses a `FrameLayout` to float a channel create button above the `ChannelListView`. Like before, we have another view model, `ChannelListViewModel`, that the stream channel list view component expects.  We initialize this in the `ChannelsFragment`:
 
+<!-- https://gist.github.com/psylinse/a4d0e5085b615001bdf0a2ba9b515ddd -->
 ```kotlin
 // android/app/src/main/java/io/getstream/thestream/ChannelsFragment.kt:19
 class ChannelsFragment : Fragment(), CoroutineScope by MainScope() {
@@ -727,6 +744,7 @@ When a user clicks on a channel, we start our `ChannelActivity`. Since that acti
 
 To create a new channel, set a click listener, via `setOnClickListener`, on our floating action button and start the `CreateChannelActivity`. This activity is a simple form that takes a new channel name. Here's the layout:
 
+<!-- https://gist.github.com/psylinse/767bc6df708acb3f4ee584848c9888dd -->
 ```xml
 <!-- android/app/src/main/res/layout/activity_create_channel.xml:1 -->
 <?xml version="1.0" encoding="utf-8"?>
@@ -770,6 +788,7 @@ To create a new channel, set a click listener, via `setOnClickListener`, on our 
 
 And our `CreateChannelActivity`:
 
+<!-- https://gist.github.com/psylinse/4e6d812a1fa7c6a4f735a28a753a5f5d -->
 ```kotlin
 // android/app/src/main/java/io/getstream/thestream/CreateChannelActivity.kt:13
 const val CHANNEL_CREATE_SUCCESS = 99
@@ -801,6 +820,7 @@ class CreateChannelActivity : AppCompatActivity(), CoroutineScope by MainScope()
 
 This activity takes the name and passes it to `ChatService.createGroupChannel`, which in turn creates a new group channel in Stream:
 
+<!-- https://gist.github.com/psylinse/9246f417c477004eb63a5eed702e33fd -->
 ```kotlin
 // android/app/src/main/java/io/getstream/thestream/services/ChatService.kt:48
 fun createGroupChannel(channelName: String) {
