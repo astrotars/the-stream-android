@@ -1,12 +1,22 @@
 # Building a Custom Chat Application with Android – Direct Messaging and Group Chat
 
-In this post, we'll create a Android application that allows a user to chat 1-on-1 and chat in groups. Stream's [Chat API](https://getstream.io/chat/), combined with Android, make it straightforward to build this sort of complex interaction. All source code for this application is available on [GitHub](https://github.com/psylinse/the-stream-android/). This application is fully functional on Android.
+In this post, we'll create a Android application that allows a user to chat 1-on-1 or chat in groups. Stream's [Chat API](https://getstream.io/chat/), combined with Android, make it straightforward to build this sort of complex interaction. All source code for this application is available on [GitHub](https://github.com/psylinse/the-stream-android/). This application is fully functional on Android.
 
-This overview shows only the essential code snippets. Each snippet has a comment that references the corresponding file and line location in the source code, where you will find necessary context for the snippets, such as layout or navigation. Please refer to the full source code for explanation on everything not covered here and to resolve any questions. Also, please refer to the `build.gradle` file for a full list of libraries required.
+## Prerequisites
 
-To [build our social network](https://getstream.io/build/social-networks/), we'll need both a backend and a mobile application. Most of the work is done in the mobile app, but we need the backend to create frontend tokens for interacting with the Stream API securely.
+Basic knowledge of [Node.js](https://nodejs.org/en/) (JavaScript), Kotlin, and Android is required to follow this tutorial. This code intended to run locally.
 
-The backend relies on [Express](https://expressjs.com/) (Node.js) leveraging Stream's [JavaScript library](https://github.com/GetStream/stream-js).
+If you'd like to follow along, you'll need a free account with [Stream](https://getstream.io/accounts/signup/) and have the latest Android Studio installed with a relatively recent Android SDK version. If you're having a hard time, feel free to open a [GitHub issue](https://github.com/psylinse/the-stream-android/issues).
+
+You also need to have the backend running. Please follow the instructions in the `backend` `README.md` to set it up.
+
+## Getting Started
+
+To keep things focused, we'll be showing only the essential code. Each snippet has a comment that references the corresponding file and line location in the source code, where you will find necessary context for the snippets, such as layout or navigation. Please refer to the full source code for explanation on everything not covered here and to resolve any questions. Also, please refer to the `build.gradle` file for a full list of libraries required.
+
+To [build our social network](https://getstream.io/build/social-networks/), we'll need both a backend and a mobile application. Most of the work is done in the mobile app, but we need the backend to create frontend tokens to interact securely with the Stream API.
+
+The backend relies on [Express](https://expressjs.com/) (Node.js) and leverages Stream's [JavaScript library](https://github.com/GetStream/stream-js).
 
 The mobile application is built in Kotlin wrapping Stream's [Android library](https://github.com/GetStream/stream-chat-android). The basic flow of the application is as follows.
 
@@ -15,26 +25,15 @@ The app goes through these steps to allow a user to chat with another:
 1. User navigates to the user list and clicks on their name or chat icon. The mobile application joins a 1-on-1 chat channel between the two users.
 1. The app queries the channel for previous messages and indicates to Stream that we'd like to watch this channel for new messages. The mobile app listens for new messages.
 1. The user creates a new message and sends it to the Stream API.
-1. When the message is created, or a message from the other user is received, the mobile application consumes the event and displays the message.
+1. When the message is created, or a message is received from the other user, the mobile application consumes the event and displays the message.
 
-For group chat, teh app goes through these steps:
+For group chat, the app goes through these steps:
 
 1. User navigates to a list of channels. They can choose to enter a previously made group or start a new group.
 1. If a user chooses to create a new group, the mobile application creates a new Stream channel. 
 1. When a user enters a room, it performs the above steps 2-4 from above. 
 
-Since we're relying on the Stream mobile libraries to do the heavy lifting, most of this work happens in the Stream Chat UI Components. The code is split between the Android mobile application contained in the `android` directory, and the Express backend is in the `backend` directory. See the README.md in the `backend` folder to see installing and running instructions. If you'd like to follow along with running code, make sure you get both the backend and mobile app running before continuing.
-
-
-## Prerequisites
-
-Basic knowledge of [Node.js](https://nodejs.org/en/) (JavaScript), Kotlin, and Android is required to follow this tutorial. This code intended to run locally.
-
-If you'd like to follow along, you'll need an account with [Stream](https://getstream.io/accounts/signup/). You must have the latest Android Studio installed with a relatively recent Android SDK version. If you're having a hard time, feel free to open a [GitHub issue](https://github.com/psylinse/the-stream-android/issues).
-
-You also need to have the backend running. Please follow the instructions in the `backend` `README.md`.
-
-Let's get started!
+We'll rely on the Stream mobile libraries to do the heavy lifting. The code is split between the Android mobile application contained in the `android` directory, and the Express backend is in the `backend` directory. See the README.md in the `backend` folder for installation and running instructions. If you'd like to follow along with running code, make sure you get both the backend and mobile app running before continuing.
 
 ## Configuring Stream Chat
 
@@ -127,7 +126,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 ```
 *Note: The asynchronous approach in this tutorial is not necessarily the best or most robust approach. It's simply a straightforward way to show async interactions without cluttering the code too much. Please research and pick the best asynchronous solution for your application.*
 
-Here we bind to our button and user input. We listen to the submit button and sign in to our backend. Since this work is making network calls, we need to do this asynchronously. We use Kotlin coroutines to accomplish this by binding to the `MainScope`. We dispatch our sign-in code which tells our `BackendService` to perform two tasks, sign in to the backend and get the chat frontend credentials. We'll look at how the `BackendService` accomplishes this in a second.
+Here we bind to our button and user input. We listen to the submit button and sign in to our backend. Since this work is making network calls, we need to do this asynchronously. We use Kotlin coroutines to accomplish this by binding to the `MainScope`. We dispatch our sign-in code which tells our `BackendService` to perform two tasks, sign in to the backend and get the chat frontend credentials. We'll look at how the `BackendService` accomplishes this later in the post.
 
 Once we have our token, we initialize our `ChatService` so we can talk to Stream's API (we'll see this in a second as well). When the user is fully authed and we have our credentials, we start a new activity called `AuthedMainActivity` which is the rest of the application.
 
@@ -185,7 +184,7 @@ fun getChatCredentials(): StreamCredentials {
 }
 ```
 
-Similar to before, we `POST` to our backend to get our chat credentials. The one difference being we use our `authToken` to authenticate against our backend. Since this backend endpoint creates a Stream user for us, let's take a look:
+Similar to before, we `POST` to our backend to get our chat credentials. The one difference being we use our `authToken` to authenticate against our backend.
 
 <!-- https://gist.github.com/psylinse/e3a6997bdab1d3afc4da222da3a9089d -->
 ```javascript
@@ -602,7 +601,7 @@ class ChannelActivity : AppCompatActivity(), MessageInputView.PermissionRequestL
 }
 ```
 
-In our `initViewModel` method we use a few built-in Stream classes. First, we create a `ChannelViewModelFactory` by passing in our channel type and `channelId`. We then use that factory by passing it into `ViewModelProvider` which will create an instance of the appropriate `ChannelViewModel`. Upon initializing, we bind this `viewModel` to our view and the necessary components. The rest of `ChannelActivity` is boilerplate that handles permissions and capturing images in the message input.
+In the `initViewModel` method we use a few built-in Stream classes. First, we create a `ChannelViewModelFactory` by passing in our channel type and `channelId`. We then use that factory by passing it into `ViewModelProvider` which will create an instance of the appropriate `ChannelViewModel`. Upon initializing, we bind this `viewModel` to our view and the necessary components. The rest of `ChannelActivity` is boilerplate that handles permissions and capturing images in the message input.
 
 We now have 1-on-1 chat. Next, let's see how to incorporate group chat.
 
