@@ -1,6 +1,6 @@
 # Building a Custom Chat Application with Android – Direct Messaging and Group Chat
 
-In this post, we'll create a simple Android application that allows a user to chat 1-on-1 and chat in groups. Stream's [Chat API](https://getstream.io/chat/), combined with Android, make it straightforward to build this sort of complex interaction. All source code for this application is available on [GitHub](https://github.com/psylinse/the-stream-android/). This application is fully functional on Android.
+In this post, we'll create a Android application that allows a user to chat 1-on-1 and chat in groups. Stream's [Chat API](https://getstream.io/chat/), combined with Android, make it straightforward to build this sort of complex interaction. All source code for this application is available on [GitHub](https://github.com/psylinse/the-stream-android/). This application is fully functional on Android.
 
 This overview shows only the essential code snippets. Each snippet has a comment that references the corresponding file and line location in the source code, where you will find necessary context for the snippets, such as layout or navigation. Please refer to the full source code for explanation on everything not covered here and to resolve any questions. Also, please refer to the `build.gradle` file for a full list of libraries required.
 
