@@ -12,11 +12,16 @@ The mobile application is built in Kotlin wrapping Stream's [Android library](ht
 
 The app goes through these steps to allow a user to chat with another:
 
-* User navigates to the user list and clicks on their name or chat icon. The mobile application joins a 1-on-1 chat channel between the two users.
-* The app queries the channel for previous messages and indicates to Stream that we'd like to watch this channel for new messages. The mobile app listens for new messages.
-* The user creates a new message and sends it to the Stream API.
-* When the message is created, or a message from the other user is received, the mobile application consumes the event and displays the message.
+1. User navigates to the user list and clicks on their name or chat icon. The mobile application joins a 1-on-1 chat channel between the two users.
+1. The app queries the channel for previous messages and indicates to Stream that we'd like to watch this channel for new messages. The mobile app listens for new messages.
+1. The user creates a new message and sends it to the Stream API.
+1. When the message is created, or a message from the other user is received, the mobile application consumes the event and displays the message.
 
+For group chat, teh app goes through these steps:
+
+1. User navigates to a list of channels. They can choose to enter a previously made group or start a new group.
+1. If a user chooses to create a new group, the mobile application creates a new Stream channel. 
+1. When a user enters a room, it performs the above steps 2-4 from above. 
 
 Since we're relying on the Stream mobile libraries to do the heavy lifting, most of this work happens in the Stream Chat UI Components. The code is split between the Android mobile application contained in the `android` directory, and the Express backend is in the `backend` directory. See the README.md in the `backend` folder to see installing and running instructions. If you'd like to follow along with running code, make sure you get both the backend and mobile app running before continuing.
 
