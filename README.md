@@ -1,8 +1,8 @@
 # Building a Custom Chat Application with Android – Direct Messaging and Group Chat
 
-In this series, we'll create a simple Android application that allows a user to chat 1-on-1 and chat in groups. Stream's [Chat API](https://getstream.io/chat/), combined with Android, make it straightforward to build this sort of complex interaction. All source code for this application is available on [GitHub](https://github.com/psylinse/the-stream-android/). This application is fully functional on Android.
+In this post, we'll create a Android application that allows a user to chat 1-on-1 and chat in groups. Stream's [Chat API](https://getstream.io/chat/), combined with Android, make it straightforward to build this sort of complex interaction. All source code for this application is available on [GitHub](https://github.com/psylinse/the-stream-android/). This application is fully functional on Android.
 
-To keep things focused, we'll be showing only the essential code. Often there is the context around those code snippets, which are necessary, such as layout or navigation. Please refer to the full source code if you're confused about how something works. Each snippet is accompanied by a comment explaining which files and lines it came from. Also, please refer to the `build.gradle` file to see what libraries we're using.
+This overview shows only the essential code snippets. Each snippet has a comment that references the corresponding file and line location in the source code, where you will find necessary context for the snippets, such as layout or navigation. Please refer to the full source code for explanation on everything not covered here and to resolve any questions. Also, please refer to the `build.gradle` file for a full list of libraries required.
 
 To [build our social network](https://getstream.io/build/social-networks/), we'll need both a backend and a mobile application. Most of the work is done in the mobile app, but we need the backend to create frontend tokens for interacting with the Stream API securely.
 
