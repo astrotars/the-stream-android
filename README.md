@@ -1,6 +1,6 @@
 # Building a Custom Chat Application with Android – Direct Messaging and Group Chat
 
-In this post, we'll create a Android application that allows a user to chat 1-on-1 or chat in groups. Stream's [Chat API](https://getstream.io/chat/), combined with Android, make it straightforward to build this sort of complex interaction. All source code for this application is available on [GitHub](https://github.com/psylinse/the-stream-android/). This application is fully functional on Android.
+In this post, we'll create an Android application that allows a user to chat 1-on-1 or chat in groups. Stream's [Chat API](https://getstream.io/chat/), combined with Android, make it straightforward to build this sort of complex interaction. All source code for this application is available on [GitHub](https://github.com/psylinse/the-stream-android/). This application is fully functional on Android.
 
 ## Prerequisites
 
@@ -12,7 +12,7 @@ You also need to have the backend running. Please follow the instructions in the
 
 ## Getting Started
 
-To keep things focused, we'll be showing only the essential code. Each snippet has a comment that references the corresponding file and line location in the source code, where you will find necessary context for the snippets, such as layout or navigation. Please refer to the full source code for explanation on everything not covered here and to resolve any questions. Also, please refer to the `build.gradle` file for a full list of libraries required.
+To keep things focused, we'll be showing only the essential code. Each snippet has a comment that references the corresponding file and line location in the source code, where you will find the necessary context for the snippets, such as layout or navigation. Please refer to the full source code for an explanation of everything not covered here and to resolve any questions. Also, please refer to the `build.gradle` file for a full list of libraries required.
 
 To [build our social network](https://getstream.io/build/social-networks/), we'll need both a backend and a mobile application. Most of the work is done in the mobile app, but we need the backend to create frontend tokens to interact securely with the Stream API.
 
@@ -22,14 +22,14 @@ The mobile application is built in Kotlin wrapping Stream's [Android library](ht
 
 The app goes through these steps to allow a user to chat with another:
 
-1. User navigates to the user list and clicks on their name or chat icon. The mobile application joins a 1-on-1 chat channel between the two users.
+1. A user navigates to the user list and clicks on their name or chat icon. The mobile application joins a 1-on-1 chat channel between the two users.
 1. The app queries the channel for previous messages and indicates to Stream that we'd like to watch this channel for new messages. The mobile app listens for new messages.
 1. The user creates a new message and sends it to the Stream API.
 1. When the message is created, or a message is received from the other user, the mobile application consumes the event and displays the message.
 
 For group chat, the app goes through these steps:
 
-1. User navigates to a list of channels. They can choose to enter a previously made group or start a new group.
+1. A user navigates to a list of channels. They can choose to enter a previously made group or start a new group.
 1. If a user chooses to create a new group, the mobile application creates a new Stream channel. 
 1. When a user enters a room, it performs the above steps 2-4 from above. 
 
@@ -128,7 +128,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
 Here we bind to our button and user input. We listen to the submit button and sign in to our backend. Since this work is making network calls, we need to do this asynchronously. We use Kotlin coroutines to accomplish this by binding to the `MainScope`. We dispatch our sign-in code which tells our `BackendService` to perform two tasks, sign in to the backend and get the chat frontend credentials. We'll look at how the `BackendService` accomplishes this later in the post.
 
-Once we have our token, we initialize our `ChatService` so we can talk to Stream's API (we'll see this in a second as well). When the user is fully authed and we have our credentials, we start a new activity called `AuthedMainActivity` which is the rest of the application.
+Once we have our token, we initialize our `ChatService` which allows us to talk to Stream's API (we'll see this in a second as well). When the user is fully authed and we have our credentials, we start a new activity called `AuthedMainActivity` which is the rest of the application.
 
 Before seeing how we start a chat, let's see how we auth and initialize Stream Chat. First we sign in to the backend via `BackendService.signIn`:
 
@@ -161,7 +161,7 @@ private fun post(path: String, body: Map<String, Any>, authToken: String? = null
 }
 ```
 
-We do a simple `POST` http request to our backend endpoint `/v1/users`, which returns a `backend` `authToken` that allows the mobile application to make further requests against the backend. Since this not a real implementation of auth, we'll skip the backend code. Please refer to the source if you're curious. Also, keep in mind, this token *is* not the Stream token. We need to make another call for that.
+We do a simple HTTP `POST` request to our backend endpoint `/v1/users`, which returns a `backend` `authToken` which allows the mobile application to make further requests against the backend. Since this is not a real implementation of auth, we'll skip the backend code. Please refer to the source if you're curious. Also, keep in mind, this token *is* not the Stream token. We need to make another call for that.
 
 Once the user is signed in with our `backend` we can get our chat credentials via `BackendService.getChatCredentials()`:
 
@@ -389,7 +389,7 @@ class PeopleFragment : Fragment(), CoroutineScope by MainScope() {
 }
 ```
 
-which is backed by a simple list layout:
+This is backed by a simple list layout:
 
 <!-- https://gist.github.com/psylinse/d8af92043ecdda948cb982a1002ba157 -->
 ```xml
